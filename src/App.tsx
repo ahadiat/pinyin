@@ -6,7 +6,9 @@ import Studyhome from "./pages/Study_Home";
 import StartLearning from "./pages/Nouns";
 import ContactForm from "./pages/test";
 import LessonComplete from "./pages/Congrats";
-import LocalStorageViewer from "./pages/debug";
+import AddWord from "../components/addWord"
+import VoiceAI from "./pages/VoiceAI";
+
 
 export default function App() {
   return (
@@ -19,7 +21,10 @@ export default function App() {
       <Route path="/start/:category" element={<StartLearning />} />
       <Route path="/test" element={<ContactForm />} />
       <Route path="/congrats" element={<LessonComplete />} />
-      <Route path="/debug" element={<LocalStorageViewer />} />
+      <Route path="/addword" element={<AddWord/>} />
+      <Route path="/pinyinai" element={<VoiceAI/>} />
+      
+ 
 
       {/* Dynamic word page */}
       <Route path="/word/:id" element={<WordDetail />} />
