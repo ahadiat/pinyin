@@ -6,7 +6,7 @@ const Home: React.FC = () => {
   const menuItems = [
     { 
       label: 'Stats', 
-      path: '/noun', 
+      path: '/account', 
       icon: <BarChart2 size={24} />, 
       color: 'text-blue-500', 
       bgColor: 'bg-blue-50' 
