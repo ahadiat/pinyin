@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { supabase } from "../../lib/supabase"
 import Avatar from "./Avatar"
 import type { User } from "@supabase/supabase-js"
-import { LogOut, Save, Globe, User as UserIcon, Key } from "lucide-react" // Optional: install lucide-react
+import { LogOut, Save, Globe, User as UserIcon, Key, ExternalLink } from "lucide-react" // Optional: install lucide-react
 
 type AccountProps = {
   user: User
@@ -130,39 +130,62 @@ export default function Account({ user }: AccountProps) {
             <div className="pt-2 border-t border-gray-100">
               <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">API Configuration</p>
               
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">OpenRouter Key</label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                      <Key size={14} />
-                    </span>
-                    <input
-                      type="password"
-                      className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
-                      placeholder="sk-or-..."
-                      value={openrouter_api_key}
-                      onChange={(e) => setOpenRouterKey(e.target.value)}
-                    />
-                  </div>
-                </div>
+              <div className="space-y-4">
+  {/* OpenRouter Field */}
+  <div>
+    <div className="flex justify-between items-center mb-1">
+      <label className="block text-xs font-medium text-gray-500">OpenRouter Key</label>
+      <a 
+        href="https://openrouter.ai/keys" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold transition-colors flex items-center gap-1"
+      >
+        Get Key <ExternalLink size={10} />
+      </a>
+    </div>
+    <div className="relative">
+      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+        <Key size={14} />
+      </span>
+      <input
+        type="password"
+        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
+        placeholder="sk-or-..."
+        value={openrouter_api_key}
+        onChange={(e) => setOpenRouterKey(e.target.value)}
+      />
+    </div>
+  </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Gemini Key</label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                      <Key size={14} />
-                    </span>
-                    <input
-                      type="password"
-                      className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
-                      placeholder="AIza..."
-                      value={gemini_api_key}
-                      onChange={(e) => setGeminiKey(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
+  {/* Gemini Field */}
+  <div>
+    <div className="flex justify-between items-center mb-1">
+      <label className="block text-xs font-medium text-gray-500">Gemini Key</label>
+      <a 
+        href="https://aistudio.google.com/app/apikey" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold transition-colors flex items-center gap-1"
+      >
+        Get Key <ExternalLink size={10} />
+      </a>
+    </div>
+    <div className="relative">
+      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+        <Key size={14} />
+      </span>
+      <input
+        type="password"
+        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
+        placeholder="AIza..."
+        value={gemini_api_key}
+        onChange={(e) => setGeminiKey(e.target.value)}
+      />
+    </div>
+  </div>
+</div>
+
             </div>
           </div>
 
