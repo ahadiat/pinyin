@@ -103,7 +103,7 @@ export default function VoiceChat({ user }: { user: User }) {
           {/* Visualizer bars for AI Speaking (The "Beat") */}
           {isAiSpeaking && (
              <div className="flex gap-1 items-center">
-                {[1, 2, 3, 2, 1].map((h, i) => (
+                {[1, 2, 3, 2, 1].map((_, i) => (
                   <div key={i} className="w-1 bg-emerald-400 animate-ai-bars" style={{ animationDelay: `${i * 0.1}s` }} />
                 ))}
              </div>
@@ -151,8 +151,8 @@ export default function VoiceChat({ user }: { user: User }) {
             <div className="w-11" /> {/* Spacer to center the main button */}
           </div>
           <p className="text-[10px] tracking-widest text-neutral-500 uppercase font-bold">
-            {isListening ? "Listening..." : "Hold to Talk"}
-          </p>
+  {isListening ? `Listening... ${timeLeft}s` : "Hold to Talk"}
+</p>
         </div>
       </div>
 
