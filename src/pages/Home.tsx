@@ -34,7 +34,7 @@ const Home: React.FC = () => {
         {/* Header Section */}
         <header className="mb-8 text-left px-2">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Pin Yin
+            Chaiyok!
           </h1>
           <p className="text-slate-500 mt-1 font-medium italic">Ready for your daily practice?</p>
         </header>
