@@ -1,7 +1,7 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getWords, type Word } from "../api/googlesheet";
-import { Volume2, Eye, Heart, Info, ArrowUp, ArrowRight, ArrowLeft } from "lucide-react";
+import {  Eye, Heart, ArrowUp, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function WordDetail() {
@@ -48,7 +48,7 @@ export default function WordDetail() {
   };
 
   // --- Gesture Handler ---
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = ( info: any) => {
     const threshold = 100;
     
     // 1. Swipe Up -> Next
