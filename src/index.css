@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
 @theme {
   --animate-blob: blob 8s ease-in-out infinite;
   --animate-sound: sound 0.8s ease-in-out infinite;

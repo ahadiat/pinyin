@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import type { User } from "@supabase/supabase-js"
 
-import Auth from "./pages/auth"
+//import Auth from "./pages/auth"
 
 import WordList from "./pages/Study"
 import WordDetail from "./pages/Studyt"
@@ -15,6 +15,9 @@ import LessonComplete from "./pages/Congrats"
 import AddWord from "../components/addWord"
 import VoiceAI from "./pages/VoiceAI"
 import Account from "./pages/Account"
+import Wor from "./pages/study_design"
+import Auth from "./pages/auth"
+import Lest from "./pages/test_lu"
 
 
 export default function App() {
@@ -59,6 +62,9 @@ export default function App() {
       <Route path="/congrats" element={<LessonComplete />} />
       <Route path="/addword" element={<AddWord />} />
       <Route path="/pinyinai" element={<VoiceAI user={user} />} />
+      <Route path="/wor/:id" element={<Wor />} />
+      <Route path="/lest" element={<Lest />} />
+
 
 
       {/* Profile with Supabase user */}
