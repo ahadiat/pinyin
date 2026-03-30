@@ -4,7 +4,10 @@ const CLIENT_ID = "640627176506-q55u5jk26lesi4q7icsgu8v8ls2q4uhc.apps.googleuser
 const API_KEY = "AIzaSyDa6bJDeeODmuVs1X4PUDVq-qDTjJ2Uw5Q";
 
 // IMPORTANT: allow write access
-const SCOPES = "https://www.googleapis.com/auth/spreadsheets.file";
+const SCOPES = [
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/drive.file"
+].join(" ");
 
 const DISCOVERY_DOC =
   "https://sheets.googleapis.com/$discovery/rest?version=v4";
