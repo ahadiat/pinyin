@@ -14,6 +14,7 @@ import {
   createDeckRecord,
   renameDeckRecord,
   getDeckById,
+  testSupabase,
 } from "../../lib/deckService";
 
 // ✅ Use ENV (important)
@@ -57,6 +58,10 @@ export default function GoogleSheetsDeck() {
   const [decks, setDecks] = useState<any[]>([]);
   const [newNames, setNewNames] = useState<Record<string, string>>({});
 
+
+  useEffect(() => {
+    testSupabase();
+  }, []);
 
   useEffect(() => {
     const loadDecks = async () => {

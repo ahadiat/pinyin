@@ -47,3 +47,12 @@ export async function getDeckById(deckId: string) {
     .eq("id", deckId)
     .single();
 }
+
+export async function testSupabase() {
+    const { data, error } = await supabase
+      .from("decks")
+      .select("*")
+      .limit(1);
+  
+    console.log("SUPABASE TEST", data, error);
+  }
