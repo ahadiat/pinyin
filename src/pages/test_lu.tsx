@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 // ✅ Use ENV (important)
-const CLIENT_ID = import.meta.env.CLIENT_ID as string
-const API_KEY = import.meta.env.API_KEY as string
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string
 
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -106,7 +106,7 @@ export default function GoogleSheetsDeck() {
         .from("profiles")
         .select("google_connected")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (data?.google_connected) {
         setIsGoogleConnected(true);
