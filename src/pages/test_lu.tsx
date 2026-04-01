@@ -35,7 +35,20 @@ declare global {
   }
 }
 
+
+
 export default function GoogleSheetsDeck() {
+
+  const [newWords, setNewWords] = useState<
+  Record<
+    string,
+    {
+      word: string;
+      meaning: string;
+      example: string;
+    }
+  >
+>({});
   const [tokenClient, setTokenClient] = useState<any>(null);
   const [gapiReady, setGapiReady] = useState(false);
   const [gisReady, setGisReady] = useState(false);
@@ -243,6 +256,34 @@ export default function GoogleSheetsDeck() {
   };
   
 
+  //update
+
+  const addWord = async (deckId: string) => {
+    try {
+      await getAccessToken();
+  
+      const { data: deck } = await getDeckById(deckId);
+  
+      if (!deck) return;
+  
+      const data = newWords[deckId];
+  
+      if (!data?.word || !data?.meaning) return;
+  
+      await addWordToGoogleSheet(
+        deck.gsheet_id,
+        data.word,
+        data.meaning,
+        data.example
+      );
+  
+      alert("Word added!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add word");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 p-8">
       <div className="mx-auto max-w-xl rounded-3xl bg-white p-8 shadow-xl">
@@ -263,37 +304,76 @@ export default function GoogleSheetsDeck() {
         )}
 
 <div className="mt-6 space-y-4">
-  {decks.map((deck) => (
-    <div
-      key={deck.id}
-      className="p-4 border rounded-xl space-y-2"
-    >
-      <div className="font-semibold">{deck.name}</div>
+{decks.map((deck) => (
+  <div key={deck.id} className="p-4 border rounded-xl space-y-2">
+    
+    <div className="font-semibold">{deck.name}</div>
 
-      <input
-        type="text"
-        placeholder="New name"
-        value={newNames[deck.id] || ""}
-        onChange={(e) =>
-          setNewNames({
-            ...newNames,
-            [deck.id]: e.target.value,
-          })
-        }
-        className="border p-2 rounded w-full"
-      />
+    {/* Rename */}
+    <input
+      value={newNames[deck.id] || ""}
+      onChange={(e) =>
+        setNewNames({
+          ...newNames,
+          [deck.id]: e.target.value,
+        })
+      }
+    />
 
-      <button
-        onClick={() =>
-          renameDeck(deck.id, newNames[deck.id])
-        }
-        className="bg-blue-500 text-white px-3 py-1 rounded"
-      >
-        Rename
-      </button>
-    </div>
-  ))}
+    <button onClick={() => renameDeck(deck.id, newNames[deck.id])}>
+      Rename
+    </button>
+
+    {/* ✅ Add word inputs (MOVE HERE) */}
+    <input
+      placeholder="Word"
+      value={newWords[deck.id]?.word || ""}
+      onChange={(e) =>
+        setNewWords({
+          ...newWords,
+          [deck.id]: {
+            ...newWords[deck.id],
+            word: e.target.value,
+          },
+        })
+      }
+    />
+
+    <input
+      placeholder="Meaning"
+      value={newWords[deck.id]?.meaning || ""}
+      onChange={(e) =>
+        setNewWords({
+          ...newWords,
+          [deck.id]: {
+            ...newWords[deck.id],
+            meaning: e.target.value,
+          },
+        })
+      }
+    />
+
+    <input
+      placeholder="Example"
+      value={newWords[deck.id]?.example || ""}
+      onChange={(e) =>
+        setNewWords({
+          ...newWords,
+          [deck.id]: {
+            ...newWords[deck.id],
+            example: e.target.value,
+          },
+        })
+      }
+    />
+
+    <button onClick={() => addWord(deck.id)}>
+      Add Word
+    </button>
+  </div>
+))}
 </div>
+
 
 
 
