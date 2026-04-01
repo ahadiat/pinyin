@@ -26,7 +26,7 @@ export async function createDeckRecord(
     user_id: userId,
     name,
     gsheet_id: gsheetId,
-    type: "google_sheet",
+    type: "word",
   });
 }
 
