@@ -2,6 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import {
+  createGoogleSheet,
+  renameGoogleSheet,
+  addWordToGoogleSheet,
+} from "../../lib/googleSheet";
+
+import {
+  getCurrentUser,
+  getDecks,
+  createDeckRecord,
+  renameDeckRecord,
+  getDeckById,
+} from "../../lib/deckService";
 
 // ✅ Use ENV (important)
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
@@ -33,15 +46,19 @@ export default function GoogleSheetsDeck() {
 
 
   useEffect(() => {
-    const fetchDecks = async () => {
-      const { data, error } = await supabase
-        .from("decks")
-        .select("*");
+    const loadDecks = async () => {
+      const user = await getCurrentUser();
   
-      if (!error) setDecks(data || []);
+      if (!user) return;
+  
+      const { data, error } = await getDecks(user.id);
+  
+      if (!error) {
+        setDecks(data || []);
+      }
     };
   
-    fetchDecks();
+    loadDecks();
   }, []);
   
 
@@ -163,48 +180,32 @@ export default function GoogleSheetsDeck() {
   // =========================
   const createDeck = async () => {
     try {
-      if (!gapiReady) {
-        alert("Google API not ready");
-        return;
-      }
-  
       setLoading(true);
+  
       await getAccessToken();
   
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
   
-      if (!user) throw new Error("User not logged in");
+      if (!user) throw new Error("No user");
   
-      const res =
-        await window.gapi.client.sheets.spreadsheets.create({
-          properties: { title: "My Flashcard Deck" },
-        });
+      const title = "My Flashcard Deck";
   
-      const spreadsheetId = res.result.spreadsheetId;
+      const { spreadsheetId, spreadsheetUrl } =
+        await createGoogleSheet(title);
   
-      await window.gapi.client.sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: "A1:C1",
-        valueInputOption: "RAW",
-        resource: {
-          values: [["Word", "Meaning", "Example"]],
-        },
-      });
+      await createDeckRecord(
+        user.id,
+        title,
+        spreadsheetId
+      );
   
-      // ✅ FIXED INSERT
-      await supabase.from("decks").insert({
-        user_id: user.id,
-        name: "My Flashcard Deck",      // ✅ correct column
-        gsheet_id: spreadsheetId,       // ✅ correct column
-        type: "google_sheet",           // optional but good
-      });
+      const { data } = await getDecks(user.id);
+      setDecks(data || []);
   
-      window.open(res.result.spreadsheetUrl, "_blank");
+      window.open(spreadsheetUrl, "_blank");
     } catch (err) {
       console.error(err);
-      alert("Failed to create deck.");
+      alert("Failed to create deck");
     } finally {
       setLoading(false);
     }
@@ -213,47 +214,31 @@ export default function GoogleSheetsDeck() {
   // =========================
   // RENAME DECK
   // =========================
-  const renameDeck = async (deckId: string, newName: string) => {
+  const renameDeck = async (
+    deckId: string,
+    newName: string
+  ) => {
     try {
-      if (!gapiReady) {
-        alert("Google API not ready");
-        return;
-      }
-  
-      const { data: deck, error } = await supabase
-        .from("decks")
-        .select("gsheet_id") // ✅ correct column
-        .eq("id", deckId)
-        .single();
-  
-      if (error || !deck) throw error;
+      if (!newName.trim()) return;
   
       await getAccessToken();
   
-      await window.gapi.client.sheets.spreadsheets.batchUpdate({
-        spreadsheetId: deck.gsheet_id, // ✅ correct
-        resource: {
-          requests: [
-            {
-              updateSpreadsheetProperties: {
-                properties: { title: newName },
-                fields: "title",
-              },
-            },
-          ],
-        },
-      });
+      const { data: deck, error } = await getDeckById(deckId);
   
-      // ✅ update YOUR column
-      await supabase
-        .from("decks")
-        .update({ name: newName }) // ✅ correct column
-        .eq("id", deckId);
+      if (error || !deck) throw error;
   
-      alert("Deck renamed successfully!");
+      await renameGoogleSheet(deck.gsheet_id, newName);
+  
+      await renameDeckRecord(deckId, newName);
+  
+      setDecks((prev) =>
+        prev.map((d) =>
+          d.id === deckId ? { ...d, name: newName } : d
+        )
+      );
     } catch (err) {
       console.error(err);
-      alert("Failed to rename deck.");
+      alert("Failed to rename deck");
     }
   };
   
