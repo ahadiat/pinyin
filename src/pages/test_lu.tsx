@@ -1,12 +1,15 @@
+"use client";
+
 import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
-const CLIENT_ID = "640627176506-q55u5jk26lesi4q7icsgu8v8ls2q4uhc.apps.googleusercontent.com";
-const API_KEY = "AIzaSyDa6bJDeeODmuVs1X4PUDVq-qDTjJ2Uw5Q";
+// ✅ Use ENV (important)
+const CLIENT_ID = import.meta.env.CLIENT_ID as string
+const API_KEY = import.meta.env.API_KEY as string
 
-// IMPORTANT: allow write access
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/drive.file"
+  "https://www.googleapis.com/auth/drive.file",
 ].join(" ");
 
 const DISCOVERY_DOC =
@@ -23,102 +26,239 @@ export default function GoogleSheetsDeck() {
   const [tokenClient, setTokenClient] = useState<any>(null);
   const [gapiReady, setGapiReady] = useState(false);
   const [gisReady, setGisReady] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // =========================
+  // Load scripts safely
+  // =========================
   useEffect(() => {
-    // Load GAPI
-    const script1 = document.createElement("script");
-    script1.src = "https://apis.google.com/js/api.js";
-    script1.onload = () => {
-      window.gapi.load("client", async () => {
-        await window.gapi.client.init({
-          apiKey: API_KEY,
-          discoveryDocs: [DISCOVERY_DOC],
-        });
-        setGapiReady(true);
-      });
-    };
-    document.body.appendChild(script1);
+    if (!document.getElementById("gapi-script")) {
+      const gapiScript = document.createElement("script");
+      gapiScript.id = "gapi-script";
+      gapiScript.src = "https://apis.google.com/js/api.js";
+      gapiScript.async = true;
 
-    // Load Google Identity Services
-    const script2 = document.createElement("script");
-    script2.src = "https://accounts.google.com/gsi/client";
-    script2.onload = () => {
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: (resp: any) => {
-          if (resp.error) {
-            console.error(resp);
-            return;
-          }
-          setIsAuthenticated(true);
-        },
-      });
-      setTokenClient(client);
-      setGisReady(true);
-    };
-    document.body.appendChild(script2);
+      gapiScript.onload = () => {
+        window.gapi.load("client", async () => {
+          await window.gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+          setGapiReady(true);
+        });
+      };
+
+      document.body.appendChild(gapiScript);
+    }
+
+    if (!document.getElementById("gis-script")) {
+      const gisScript = document.createElement("script");
+      gisScript.id = "gis-script";
+      gisScript.src = "https://accounts.google.com/gsi/client";
+      gisScript.async = true;
+
+      gisScript.onload = () => {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: () => {}, // will override dynamically
+        });
+
+        setTokenClient(client);
+        setGisReady(true);
+      };
+
+      document.body.appendChild(gisScript);
+    }
   }, []);
 
-  // Step 1: Login
-  const handleAuth = () => {
-    tokenClient.requestAccessToken({ prompt: "consent" });
+  // =========================
+  // Restore connection state
+  // =========================
+  useEffect(() => {
+    const checkConnection = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("google_connected")
+        .eq("id", user.id)
+        .single();
+
+      if (data?.google_connected) {
+        setIsGoogleConnected(true);
+      }
+    };
+
+    checkConnection();
+  }, []);
+
+  // =========================
+  // Proper token handler
+  // =========================
+  const getAccessToken = () => {
+    return new Promise<void>((resolve, reject) => {
+      if (!tokenClient) return reject("No token client");
+
+      tokenClient.callback = async (response: any) => {
+        if (response.error) {
+          reject(response);
+        } else {
+          window.gapi.client.setToken(response);
+          setIsGoogleConnected(true);
+
+          // save to supabase
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (user) {
+            await supabase
+              .from("profiles")
+              .update({ google_connected: true })
+              .eq("id", user.id);
+          }
+
+          resolve();
+        }
+      };
+
+      tokenClient.requestAccessToken({ prompt: "" });
+    });
   };
 
-  // Step 2: Create a new deck (Google Sheet)
+  const connectGoogle = async () => {
+    try {
+      await getAccessToken();
+    } catch {
+      tokenClient?.requestAccessToken({ prompt: "consent" });
+    }
+  };
+
+  // =========================
+  // CREATE DECK
+  // =========================
   const createDeck = async () => {
     try {
-      const response =
+      if (!gapiReady) {
+        alert("Google API not ready");
+        return;
+      }
+  
+      setLoading(true);
+      await getAccessToken();
+  
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+  
+      if (!user) throw new Error("User not logged in");
+  
+      const res =
         await window.gapi.client.sheets.spreadsheets.create({
-          properties: {
-            title: "My Flashcard Deck",
-          },
-          sheets: [
-            {
-              properties: {
-                title: "Deck 1",
-              },
-            },
-          ],
+          properties: { title: "My Flashcard Deck" },
         });
-
-      const spreadsheetId = response.result.spreadsheetId;
-
-      console.log("Created Sheet ID:", spreadsheetId);
-
-      // Add headers
+  
+      const spreadsheetId = res.result.spreadsheetId;
+  
       await window.gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId,
-        range: "Deck 1!A1:C1",
+        range: "A1:C1",
         valueInputOption: "RAW",
         resource: {
           values: [["Word", "Meaning", "Example"]],
         },
       });
-
-      alert("Deck created successfully!");
-
-    } catch (error) {
-      console.error("Error creating deck:", error);
+  
+      // ✅ FIXED INSERT
+      await supabase.from("decks").insert({
+        user_id: user.id,
+        name: "My Flashcard Deck",      // ✅ correct column
+        gsheet_id: spreadsheetId,       // ✅ correct column
+        type: "google_sheet",           // optional but good
+      });
+  
+      window.open(res.result.spreadsheetUrl, "_blank");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create deck.");
+    } finally {
+      setLoading(false);
     }
   };
+  
+  // =========================
+  // RENAME DECK
+  // =========================
+  const renameDeck = async (deckId: string, newName: string) => {
+    try {
+      if (!gapiReady) {
+        alert("Google API not ready");
+        return;
+      }
+  
+      const { data: deck, error } = await supabase
+        .from("decks")
+        .select("gsheet_id") // ✅ correct column
+        .eq("id", deckId)
+        .single();
+  
+      if (error || !deck) throw error;
+  
+      await getAccessToken();
+  
+      await window.gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: deck.gsheet_id, // ✅ correct
+        resource: {
+          requests: [
+            {
+              updateSpreadsheetProperties: {
+                properties: { title: newName },
+                fields: "title",
+              },
+            },
+          ],
+        },
+      });
+  
+      // ✅ update YOUR column
+      await supabase
+        .from("decks")
+        .update({ name: newName }) // ✅ correct column
+        .eq("id", deckId);
+  
+      alert("Deck renamed successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to rename deck.");
+    }
+  };
+  
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Flashcard Deck (Google Sheets)</h1>
+    <div className="min-h-screen bg-slate-100 p-8">
+      <div className="mx-auto max-w-xl rounded-3xl bg-white p-8 shadow-xl">
+        <h1 className="mb-2 text-3xl font-bold">
+          Google Sheets Deck App
+        </h1>
 
-      {gapiReady && gisReady && !isAuthenticated && (
-        <button onClick={handleAuth}>
-          Connect Google
-        </button>
-      )}
-
-      {isAuthenticated && (
-        <button onClick={createDeck}>
-          Create New Deck
-        </button>
-      )}
+        {!gapiReady || !gisReady ? (
+          <div>Loading Google API...</div>
+        ) : !isGoogleConnected ? (
+          <button onClick={connectGoogle}>
+            Connect Google Sheets
+          </button>
+        ) : (
+          <button onClick={createDeck} disabled={loading}>
+            {loading ? "Creating..." : "Create Deck"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
