@@ -28,6 +28,24 @@ export default function GoogleSheetsDeck() {
   const [gisReady, setGisReady] = useState(false);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [decks, setDecks] = useState<any[]>([]);
+  const [newNames, setNewNames] = useState<Record<string, string>>({});
+
+
+  useEffect(() => {
+    const fetchDecks = async () => {
+      const { data, error } = await supabase
+        .from("decks")
+        .select("*");
+  
+      if (!error) setDecks(data || []);
+    };
+  
+    fetchDecks();
+  }, []);
+  
+
+
 
   // =========================
   // Load scripts safely
@@ -258,6 +276,42 @@ export default function GoogleSheetsDeck() {
             {loading ? "Creating..." : "Create Deck"}
           </button>
         )}
+
+<div className="mt-6 space-y-4">
+  {decks.map((deck) => (
+    <div
+      key={deck.id}
+      className="p-4 border rounded-xl space-y-2"
+    >
+      <div className="font-semibold">{deck.name}</div>
+
+      <input
+        type="text"
+        placeholder="New name"
+        value={newNames[deck.id] || ""}
+        onChange={(e) =>
+          setNewNames({
+            ...newNames,
+            [deck.id]: e.target.value,
+          })
+        }
+        className="border p-2 rounded w-full"
+      />
+
+      <button
+        onClick={() =>
+          renameDeck(deck.id, newNames[deck.id])
+        }
+        className="bg-blue-500 text-white px-3 py-1 rounded"
+      >
+        Rename
+      </button>
+    </div>
+  ))}
+</div>
+
+
+
       </div>
     </div>
   );
