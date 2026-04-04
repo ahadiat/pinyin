@@ -22,12 +22,16 @@ export async function createDeckRecord(
   name: string,
   gsheetId: string
 ) {
-  return supabase.from("decks").insert({
+  const result = await supabase.from("decks").insert({
     user_id: userId,
     name,
     gsheet_id: gsheetId,
     type: "word",
   });
+
+  console.log("CREATE DECK RESULT", result);
+
+  return result;
 }
 
 export async function renameDeckRecord(
