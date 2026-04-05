@@ -35,11 +35,12 @@ export async function createDeckRecord(
 }
 
 export async function renameDeck(deckId: string, newName: string) {
-  return supabase
+  return await supabase
     .from("decks")
     .update({ name: newName })
     .eq("id", deckId);
 }
+
 
 
 export async function getDeckById(deckId: string) {

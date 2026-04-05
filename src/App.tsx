@@ -65,7 +65,7 @@ if (!user) {
       <Route path="/pinyinai" element={<VoiceAI user={user} />} />
       <Route path="/wor/:id" element={<Wor />} />
       <Route path="/lest" element={<Lest />} />
-      <Route path="/dynamic" element={<DeckPage />} />
+      <Route path="/deck/:type" element={<DeckPage />} />
 
 
 

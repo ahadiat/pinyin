@@ -3,12 +3,25 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { getDecksByType, renameDeck } from "../../lib/deckService";
 
+
+type Deck = {
+    id: string;
+    user_id: string;
+    name: string;
+    gsheet_id: string;
+    type: string;
+    created_at: string;
+  };
+  
+  
+
 export default function DeckPage() {
   const { type } = useParams(); // "word" or "phrase"
 
   const [user, setUser] = useState<any>(null);
-  const [decks, setDecks] = useState<any[]>([]);
-  const [newNames, setNewNames] = useState<any>({});
+  const [decks, setDecks] = useState<Deck[]>([]);
+const [newNames, setNewNames] = useState<Record<string, string>>({});
+
 
   // ✅ Get user
   useEffect(() => {
@@ -40,18 +53,36 @@ export default function DeckPage() {
 
   // ✏️ Rename handler
   const handleRename = async (deckId: string) => {
-    const newName = newNames[deckId];
-    if (!newName) return;
-
-    await renameDeck(deckId, newName);
-
-    // refresh
+    const newName = newNames[deckId]?.trim();
+  
+    if (!newName) {
+      alert("Name cannot be empty");
+      return;
+    }
+  
+    const currentDeck = decks.find(d => d.id === deckId);
+    if (currentDeck?.name === newName) return;
+  
+    const { error } = await renameDeck(deckId, newName);
+  
+    if (error) {
+      console.error("Rename failed:", error);
+      alert("Rename failed or not allowed");
+      return;
+    }
+  
     setDecks((prev) =>
-      prev.map((d) =>
-        d.id === deckId ? { ...d, name: newName } : d
+      prev.map((deck) =>
+        deck.id === deckId ? { ...deck, name: newName } : deck
       )
     );
+  
+    setNewNames((prev) => ({
+      ...prev,
+      [deckId]: "",
+    }));
   };
+  
 
   // 📋 Copy gsheet_id
   const copySheetId = (id: string) => {
