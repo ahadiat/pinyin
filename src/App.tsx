@@ -46,7 +46,7 @@ export default function App() {
   if (loading) return <div>Loading...</div>
 
   // If not logged in → show Auth
-  if (!user) {
+if (!user) {
  return <Auth />
   }
 
@@ -68,7 +68,7 @@ export default function App() {
 
 
       {/* Profile with Supabase user */}
-      //<Route path="/account" element={<Account user={user} />} />
+      <Route path="/account" element={<Account user={user} />} />
 
       {/* Dynamic word page */}
       <Route path="/word/:id" element={<WordDetail />} />
@@ -77,3 +77,4 @@ export default function App() {
 }
 
 //  
+// //

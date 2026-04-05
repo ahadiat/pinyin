@@ -64,20 +64,41 @@ export default function GoogleSheetsDeck() {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+  
     const loadDecks = async () => {
-      const user = await getCurrentUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+  
+      console.log("USER:", user);
   
       if (!user) return;
   
-      const { data, error } = await getDecks(user.id);
+      const { data, error } = await supabase
+        .from("decks")
+        .select("*")
+        .eq("user_id", user.id);
   
-      if (!error) {
-        setDecks(data || []);
+      console.log("DECKS:", data);
+      console.log("ERROR:", error);
+  
+      if (!ignore) {
+        if (error) {
+          console.error(error);
+        } else {
+          setDecks(data || []);
+        }
       }
     };
   
     loadDecks();
+  
+    return () => {
+      ignore = true;
+    };
   }, []);
+  
   
 
 
@@ -308,7 +329,8 @@ export default function GoogleSheetsDeck() {
           </button>
         )}
 
-<div className="mt-6 space-y-4">
+<div className="mt-6 space-y-4 bg-amber-500">
+<div>Deck count: {decks.length}</div>
 {decks.map((deck) => (
   <div key={deck.id} className="p-4 border rounded-xl space-y-2">
     
