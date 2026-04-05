@@ -52,6 +52,16 @@ export async function getDeckById(deckId: string) {
     .single();
 }
 
+export async function getDecksByType(userId: string, type: "word" | "phrase") {
+  return await supabase
+    .from("decks")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("type", type)
+    .order("created_at", { ascending: false });
+}
+
+
 export async function testSupabase() {
     const { data, error } = await supabase
       .from("decks")

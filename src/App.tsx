@@ -18,6 +18,7 @@ import Account from "./pages/Account"
 import Wor from "./pages/study_design"
 import Auth from "./pages/auth"
 import Lest from "./pages/test_lu"
+import DeckPage from "./pages/dynamic_page"
 
 
 export default function App() {
@@ -64,6 +65,7 @@ if (!user) {
       <Route path="/pinyinai" element={<VoiceAI user={user} />} />
       <Route path="/wor/:id" element={<Wor />} />
       <Route path="/lest" element={<Lest />} />
+      <Route path="/dynamic" element={<DeckPage />} />
 
 
 
@@ -77,4 +79,4 @@ if (!user) {
 }
 
 //  
-// //
+// 

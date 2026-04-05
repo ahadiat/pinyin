@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { BarChart2, BookOpen, Book, Plus, MessageCircle } from 'lucide-react';
+import { BarChart2, BookOpen, Book, MessageCircle } from 'lucide-react';
+import FloatingActionButton from '../../components/button_add'
 
 const Home: React.FC = () => {
   const menuItems = [
@@ -99,19 +100,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* --- ADD BUTTON (Floating Action Button) --- */}
-      <div className="fixed bottom-8 right-6 flex flex-col items-end gap-2">
-        <span className="bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
-          Add New
-        </span>
-        
-        <Link
-          to="/add-word"
-          className="bg-orange-500 hover:bg-orange-600 text-white p-5 rounded-full shadow-xl 
-                     transition-all duration-300 hover:rotate-90 active:scale-90 flex items-center justify-center group relative"
-        >
-          <Plus size={32} strokeWidth={3} />
-        </Link>
-      </div>
+     <FloatingActionButton />
     </div>
   );
 };
