@@ -12,7 +12,7 @@ import {
   getCurrentUser,
   getDecks,
   createDeckRecord,
-  renameDeckRecord,
+
   getDeckById,
   testSupabase,
 } from "../../lib/deckService";
@@ -268,7 +268,7 @@ export default function GoogleSheetsDeck() {
   
       await renameGoogleSheet(deck.gsheet_id, newName);
   
-      await renameDeckRecord(deckId, newName);
+ 
   
       setDecks((prev) =>
         prev.map((d) =>

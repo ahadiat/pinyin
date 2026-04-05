@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import { getDecksByType } from "../../lib/deckService";
-
+import { getDecksByType, renameDeck } from "../../lib/deckService";
 
 export default function DeckPage() {
+  const { type } = useParams(); // "word" or "phrase"
+
   const [user, setUser] = useState<any>(null);
-  const [wordDecks, setWordDecks] = useState<any[]>([]);
-  const [phraseDecks, setPhraseDecks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [decks, setDecks] = useState<any[]>([]);
+  const [newNames, setNewNames] = useState<any>({});
 
   // ✅ Get user
   useEffect(() => {
@@ -16,67 +17,97 @@ export default function DeckPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      console.log("USER:", user);
       setUser(user);
     };
 
     getUser();
   }, []);
 
-  // ✅ Fetch decks AFTER user exists
+  // ✅ Fetch decks by type
   useEffect(() => {
-    if (!user) return;
+    if (!user || !type) return;
 
     const loadDecks = async () => {
-      setLoading(true);
+      const { data, error } = await getDecksByType(user.id, type);
 
-      const { data: words } = await getDecksByType(user.id, "word");
-      const { data: phrases } = await getDecksByType(user.id, "phrase");
-
-      setWordDecks(words || []);
-      setPhraseDecks(phrases || []);
-
-      setLoading(false);
+      if (!error) {
+        setDecks(data || []);
+      }
     };
 
     loadDecks();
-  }, [user]);
+  }, [user, type]);
+
+  // ✏️ Rename handler
+  const handleRename = async (deckId: string) => {
+    const newName = newNames[deckId];
+    if (!newName) return;
+
+    await renameDeck(deckId, newName);
+
+    // refresh
+    setDecks((prev) =>
+      prev.map((d) =>
+        d.id === deckId ? { ...d, name: newName } : d
+      )
+    );
+  };
+
+  // 📋 Copy gsheet_id
+  const copySheetId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    alert("Copied!");
+  };
 
   if (!user) return <div>Please login</div>;
-  if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="p-6 space-y-8">
-      
-      {/* WORDS */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">📘 Word Decks</h2>
+    <div className="p-6 space-y-4">
 
-        {wordDecks.length === 0 ? (
-          <p>No word decks</p>
-        ) : (
-          wordDecks.map((deck) => (
-            <div key={deck.id} className="p-4 border rounded-xl mb-2">
-              {deck.name}
-            </div>
-          ))
-        )}
-      </div>
+      <h1 className="text-2xl font-bold capitalize">
+        {type} Decks
+      </h1>
 
-      {/* PHRASES */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">💬 Phrase Decks</h2>
+      {decks.map((deck) => (
+        <div key={deck.id} className="p-4 border rounded-xl space-y-2">
 
-        {phraseDecks.length === 0 ? (
-          <p>No phrase decks</p>
-        ) : (
-          phraseDecks.map((deck) => (
-            <div key={deck.id} className="p-4 border rounded-xl mb-2">
-              {deck.name}
-            </div>
-          ))
-        )}
-      </div>
+          {/* Name */}
+          <div className="font-semibold">{deck.name}</div>
+
+          {/* Rename */}
+          <input
+            placeholder="New name"
+            value={newNames[deck.id] || ""}
+            onChange={(e) =>
+              setNewNames({
+                ...newNames,
+                [deck.id]: e.target.value,
+              })
+            }
+          />
+
+          <button onClick={() => handleRename(deck.id)}>
+            Rename
+          </button>
+
+          {/* Copy Sheet ID */}
+          <button onClick={() => copySheetId(deck.gsheet_id)}>
+            Copy Sheet ID
+          </button>
+
+          {/* View (Google Sheets) */}
+          <a
+            href={`https://docs.google.com/spreadsheets/d/${deck.gsheet_id}`}
+            target="_blank"
+          >
+            View Sheet
+          </a>
+
+          {/* Optional: Go to detail page */}
+          {/* <Link to={`/deck/view/${deck.id}`}>Open Deck</Link> */}
+
+        </div>
+      ))}
 
     </div>
   );

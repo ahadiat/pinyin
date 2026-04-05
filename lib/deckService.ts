@@ -34,15 +34,13 @@ export async function createDeckRecord(
   return result;
 }
 
-export async function renameDeckRecord(
-  deckId: string,
-  newName: string
-) {
+export async function renameDeck(deckId: string, newName: string) {
   return supabase
     .from("decks")
     .update({ name: newName })
     .eq("id", deckId);
 }
+
 
 export async function getDeckById(deckId: string) {
   return supabase
@@ -52,14 +50,15 @@ export async function getDeckById(deckId: string) {
     .single();
 }
 
-export async function getDecksByType(userId: string, type: "word" | "phrase") {
-  return await supabase
+export async function getDecksByType(userId: string, type: string) {
+  return supabase
     .from("decks")
     .select("*")
     .eq("user_id", userId)
     .eq("type", type)
     .order("created_at", { ascending: false });
 }
+
 
 
 export async function testSupabase() {
