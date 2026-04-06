@@ -13,10 +13,11 @@ import StartLearning from "./pages/Nouns"
 import ContactForm from "./pages/test"
 import LessonComplete from "./pages/Congrats"
 import AddWord from "../components/addWord"
-import VoiceAI from "./pages/VoiceAI"
-import Account from "./pages/Account"
+import GoogleSheetAdd from "./pages/addwor"
+//import VoiceAI from "./pages/VoiceAI"
+//import Account from "./pages/Account"
 import Wor from "./pages/study_design"
-import Auth from "./pages/auth"
+//import Auth from "./pages/auth"
 import Lest from "./pages/test_lu"
 import DeckPage from "./pages/dynamic_page"
 
@@ -47,9 +48,9 @@ export default function App() {
   if (loading) return <div>Loading...</div>
 
   // If not logged in → show Auth
-if (!user) {
- return <Auth />
-  }
+//if (!user) {
+// return <Auth />
+//  }
 
   return (
     <Routes>
@@ -62,15 +63,17 @@ if (!user) {
       <Route path="/test" element={<ContactForm />} />
       <Route path="/congrats" element={<LessonComplete />} />
       <Route path="/addword" element={<AddWord />} />
-      <Route path="/pinyinai" element={<VoiceAI user={user} />} />
+      
       <Route path="/wor/:id" element={<Wor />} />
       <Route path="/lest" element={<Lest />} />
       <Route path="/deck/:type" element={<DeckPage />} />
+      <Route path="/add/:type" element={<GoogleSheetAdd />} />
+
 
 
 
       {/* Profile with Supabase user */}
-      <Route path="/account" element={<Account user={user} />} />
+      
 
       {/* Dynamic word page */}
       <Route path="/word/:id" element={<WordDetail />} />
@@ -78,5 +81,5 @@ if (!user) {
   )
 }
 
-//  
-// 
+//  <Route path="/pinyinai" element={<VoiceAI user={user} />} />
+// <Route path="/account" element={<Account user={user} />} />

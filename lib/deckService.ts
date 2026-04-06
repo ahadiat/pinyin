@@ -20,13 +20,14 @@ export async function getDecks(userId: string) {
 export async function createDeckRecord(
   userId: string,
   name: string,
-  gsheetId: string
+  gsheetId: string,
+  type: "word" | "phrase"
 ) {
   const result = await supabase.from("decks").insert({
     user_id: userId,
     name,
     gsheet_id: gsheetId,
-    type: "word",
+    type,
   });
 
   console.log("CREATE DECK RESULT", result);

@@ -6,9 +6,9 @@ const FloatingActionButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { icon: <Type size={20} />, label: 'Word', to: '/add-word', color: 'bg-blue-500' },
-    { icon: <MessageSquare size={20} />, label: 'Phrase', to: '/add-phrase', color: 'bg-green-500' },
-    { icon: <Layers size={20} />, label: 'New Deck', to: '/add-deck', color: 'bg-purple-500' },
+    { icon: <Type size={20} />, label: 'Word', to: '/deck/word', color: 'bg-blue-500' },
+    { icon: <MessageSquare size={20} />, label: 'Phrase', to: '/deck/phrases', color: 'bg-green-500' },
+    { icon: <Layers size={20} />, label: 'New Deck', to: '/lest', color: 'bg-purple-500' },
   ];
 
   return (

@@ -3,23 +3,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import {
-  createGoogleSheet,
-  renameGoogleSheet,
-  addWordToGoogleSheet,
-} from "../../lib/googleSheet";
-
-import {
-  getCurrentUser,
-  getDecks,
-  createDeckRecord,
-
-  getDeckById,
-  testSupabase,
-} from "../../lib/deckService";
+    renameGoogleSheet,
+    addWordToGoogleSheet,
+  } from "../../lib/googleSheet";
+  
+  import {
+    getDeckById,
+    testSupabase,
+  } from "../../lib/deckService";
+  import { useParams } from "react-router-dom";
 
 // ✅ Use ENV (important)
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string
+const { type } = useParams();
 
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -38,7 +35,7 @@ declare global {
 
 
 
-export default function GoogleSheetsDeck() {
+export default function GoogleSheetsAdd() {
 
   const [newWords, setNewWords] = useState<
   Record<
@@ -54,10 +51,10 @@ export default function GoogleSheetsDeck() {
   const [gapiReady, setGapiReady] = useState(false);
   const [gisReady, setGisReady] = useState(false);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
-  const [loading, setLoading] = useState(false);
+ 
   const [decks, setDecks] = useState<any[]>([]);
   const [newNames, setNewNames] = useState<Record<string, string>>({});
-  const [deckType, setDeckType] = useState<"word" | "phrase">("word");
+  
 
 
   useEffect(() => {
@@ -218,42 +215,6 @@ export default function GoogleSheetsDeck() {
   // =========================
   // CREATE DECK
   // =========================
-  const createDeck = async () => {
-    try {
-      setLoading(true);
-  
-      await getAccessToken();
-  
-      const user = await getCurrentUser();
-  
-      if (!user) throw new Error("No user");
-  
-      const title =
-        deckType === "word"
-          ? "My Word Deck"
-          : "My Phrase Deck";
-  
-      const { spreadsheetId, spreadsheetUrl } =
-        await createGoogleSheet(title);
-  
-      await createDeckRecord(
-        user.id,
-        title,
-        spreadsheetId,
-        deckType
-      );
-  
-      const { data } = await getDecks(user.id);
-      setDecks(data || []);
-  
-      window.open(spreadsheetUrl, "_blank");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create deck");
-    } finally {
-      setLoading(false);
-    }
-  };
   
   // =========================
   // RENAME DECK
@@ -325,53 +286,30 @@ export default function GoogleSheetsDeck() {
         {!gapiReady || !gisReady ? (
   <div>Loading Google API...</div>
 ) : !isGoogleConnected ? (
-  <>
-    <div className="mt-4 mb-4">
-      <label className="block mb-2 font-medium">Deck Type</label>
-
-      <select
-        value={deckType}
-        onChange={(e) =>
-          setDeckType(e.target.value as "word" | "phrase")
-        }
-        className="border rounded-lg p-2"
-      >
-        <option value="word">Words</option>
-        <option value="phrase">Phrases</option>
-      </select>
-    </div>
-
-    <button onClick={connectGoogle}>
-      Connect Google Sheets
-    </button>
-  </>
+  <button
+    className="rounded-lg bg-black px-4 py-2 text-white"
+    onClick={connectGoogle}
+  >
+    Connect Google Sheets
+  </button>
 ) : (
-  <>
-    <div className="mt-4 mb-4">
-      <label className="block mb-2 font-medium">Deck Type</label>
-
-      <select
-        value={deckType}
-        onChange={(e) =>
-          setDeckType(e.target.value as "word" | "phrase")
-        }
-        className="border rounded-lg p-2"
-      >
-        <option value="word">Words</option>
-        <option value="phrase">Phrases</option>
-      </select>
-    </div>
-
-    <button onClick={createDeck} disabled={loading}>
-      {loading ? "Creating..." : "Create Deck"}
-    </button>
-  </>
+  <div className="rounded-lg bg-green-100 p-3 text-green-700">
+    Google Sheets Connected
+  </div>
 )}
 
 <div className="mt-6 space-y-4 bg-amber-500">
+<h1 className="mb-2 text-3xl font-bold">
+  {type === "phrases" ? "Phrase Decks" : "Word Decks"}
+</h1>
 <div>Deck count: {decks.length}</div>
 
-{decks.map((deck) => (
+{decks
+  .filter((deck) => {
+    if (!type) return true;
+    return deck.type === type;
+  })
+  .map((deck) => (
   <div key={deck.id} className="p-4 border rounded-xl space-y-2">
     
     <div className="font-semibold">{deck.name}</div>
