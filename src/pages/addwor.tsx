@@ -16,7 +16,7 @@ import {
 // ✅ Use ENV (important)
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string
-const { type } = useParams();
+
 
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -36,6 +36,7 @@ declare global {
 
 
 export default function GoogleSheetsAdd() {
+  const { type } = useParams();
 
   const [newWords, setNewWords] = useState<
   Record<
