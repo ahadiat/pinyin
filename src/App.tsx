@@ -13,7 +13,7 @@ import StartLearning from "./pages/Nouns"
 import ContactForm from "./pages/test"
 import LessonComplete from "./pages/Congrats"
 import AddWord from "../components/addWord"
-//import GoogleSheetAdd from "./pages/addwor"
+import GoogleSheetAdd from "./pages/addwor"
 import VoiceAI from "./pages/VoiceAI"
 import Account from "./pages/Account"
 import Wor from "./pages/study_design"
@@ -67,6 +67,7 @@ if (!user) {
       <Route path="/wor/:id" element={<Wor />} />
       <Route path="/lest" element={<Lest />} />
       <Route path="/deck/:type" element={<DeckPage />} />
+      <Route path="/add/:type" element={<GoogleSheetAdd />} />
      
 
 
@@ -82,5 +83,5 @@ if (!user) {
 }
 
 // 
-// <Route path="/add/:type" element={<GoogleSheetAdd />} />
+// 
 // 
